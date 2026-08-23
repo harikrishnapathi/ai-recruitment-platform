@@ -1,191 +1,200 @@
 # AI Recruitment & Talent Intelligence Platform
 
-Production-oriented full-stack recruitment application with:
+An AI-powered recruitment platform that helps recruiters discover and evaluate candidates based on job requirements, skills, experience, and resume content.
 
-- FastAPI + PostgreSQL backend
-- React + Vite frontend
-- JWT authentication
-- Recruiter and candidate accounts
-- Job creation and publishing
-- Candidate applications
-- Resume upload (PDF/DOCX)
-- Resume text extraction
-- Gemini-powered AI resume analysis
-- Skill normalization and job matching
-- Recruiter candidate ranking
-- Candidate profile management
-- Resume deletion and re-analysis
-- Alembic database migrations
-- Render deployment configuration
+The platform provides separate workflows for candidates and recruiters, including resume analysis, job applications, skill-based matching, candidate ranking, and recruitment management.
 
-## Local development
+## Live Demo
 
-### Backend
+Frontend:
+https://ai-recruitment-platform-1-8m1v.onrender.com
 
-```powershell
-cd backend
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-Copy-Item .env.example .env
-```
+Backend API:
+https://ai-recruitment-platform-prka.onrender.com
 
-Set these values in `backend/.env`:
+API Documentation:
+https://ai-recruitment-platform-prka.onrender.com/docs
 
-```text
-DATABASE_URL=...
-JWT_SECRET_KEY=...
-GEMINI_API_KEY=...
-FRONTEND_URL=http://localhost:5173
-SKILL_SEED_KEY=...
-```
+GitHub:
+https://github.com/harikrishnapathi/ai-recruitment-platform
 
-Run migrations:
+---
 
-```powershell
-alembic upgrade head
-```
+## What I Built
 
-Start API:
+I developed this project as a full-stack recruitment platform with an AI-assisted candidate evaluation workflow.
 
-```powershell
-uvicorn app.main:app --reload
-```
+The main idea is simple:
 
-Health check:
+A candidate uploads a resume → the system extracts and analyzes the resume → the candidate applies for jobs → the platform compares candidate skills with job requirements → recruiters can review candidates using match scores and skill differences.
 
-```text
-http://127.0.0.1:8000/api/v1/health
-```
+The application has two main user roles:
 
-### Frontend
+- Candidate / Job Seeker
+- Recruiter / Hiring Team
 
-```powershell
-cd frontend
-npm ci
-Copy-Item .env.example .env
-npm run dev
-```
+---
 
-For local development:
-
-```text
-VITE_API_URL=http://127.0.0.1:8000/api/v1
-```
-
-## Production deployment on Render
-
-### Backend
-
-Use the root `render.yaml`.
-
-Set:
-
-- `DATABASE_URL`
-- `JWT_SECRET_KEY`
-- `GEMINI_API_KEY`
-- `FRONTEND_URL`
-- `SKILL_SEED_KEY`
-
-The backend build automatically runs:
-
-```text
-pip install -r requirements.txt
-alembic upgrade head
-```
-
-### Frontend
-
-Use `frontend/render.yaml`.
-
-Set:
-
-```text
-VITE_API_URL=https://YOUR-BACKEND.onrender.com/api/v1
-```
-
-Replace `YOUR-BACKEND` with the actual Render backend hostname.
-
-## Important production security
-
-Never commit `.env` files, API keys, JWT secrets, or uploaded resumes.
-
-The repository intentionally contains only `.env.example` files.
-
-Generate a new strong secret for production and configure it through Render environment variables.
-
-## Main application flow
+## Key Features
 
 ### Candidate
 
-1. Register as Candidate.
-2. Complete profile.
-3. Upload PDF/DOCX resume.
-4. Click **Run AI Analysis**.
-5. AI analysis is persisted to PostgreSQL.
-6. Skills are available to the matching engine.
-7. Browse published jobs.
-8. Apply to jobs.
-9. View application status.
+- Candidate registration and login
+- JWT-based authentication
+- Candidate dashboard
+- Resume upload
+- PDF and DOCX resume support
+- Resume text extraction
+- AI resume analysis
+- Skill extraction
+- Experience extraction
+- Education information
+- Resume strengths and weaknesses
+- Browse published jobs
+- Apply for jobs
+- Track application status
 
 ### Recruiter
 
-1. Register as Recruiter.
-2. Create a job.
-3. Add required skills.
-4. Publish the job.
-5. Review candidates.
-6. Candidate matches are recalculated from stored candidate skills and AI resume skills.
-7. Open **View Candidate** to see:
-   - name
-   - email
-   - phone
-   - location
-   - headline
-   - current title/company
-   - experience
-   - resume
-   - AI analysis
-   - matching skills
-   - missing skills
-   - match percentage
-   - recommendation
+- Recruiter registration and login
+- Recruiter dashboard
+- Create jobs
+- Publish jobs
+- Archive/delete published jobs
+- Define required skills
+- Specify required experience for skills
+- View applicants
+- View candidate details
+- Resume information
+- Candidate/job matching
+- Matching skills
+- Missing skills
+- Match score
+- Candidate recommendations
 
-## Matching behavior
+---
 
-The matching engine normalizes common aliases such as:
-
-- `py` → `python`
-- `python3` → `python`
-- `postgres` → `postgresql`
-- `fast api` → `fastapi`
-- `k8s` → `kubernetes`
-- `js` → `javascript`
-- `ts` → `typescript`
-- `react.js` → `react`
-- `nodejs` → `node.js`
-- `aws cloud` → `aws`
-
-The score is:
+## AI Recruitment Workflow
 
 ```text
-matching required skills / total required skills × 100
-```
+Candidate Resume
+       │
+       ▼
+Resume Upload
+       │
+       ▼
+Text Extraction
+       │
+       ▼
+AI Resume Analysis
+       │
+       ├── Skills
+       ├── Experience
+       ├── Education
+       ├── Strengths
+       └── Weaknesses
+       │
+       ▼
+Candidate Profile
+       │
+       ▼
+Job Application
+       │
+       ▼
+Job Requirements
+       │
+       ▼
+Candidate / Job Matching
+       │
+       ├── Matching Skills
+       ├── Missing Skills
+       ├── Match Score
+       └── Recommendation
+       │
+       ▼
+Recruiter Candidate Ranking
 
-The match is persisted in `job_matches`.
+Backend Architecture
 
-## Validation performed
+React Frontend
+      │
+      │ REST API
+      ▼
+FastAPI Backend
+      │
+      ├── Authentication
+      ├── Candidate APIs
+      ├── Recruiter APIs
+      ├── Job APIs
+      ├── Application APIs
+      ├── Resume APIs
+      └── Matching APIs
+      │
+      ▼
+SQLAlchemy
+      │
+      ▼
+PostgreSQL
 
-The backend Python source has been syntax-compiled with:
 
-```text
-python -m compileall app
-```
+Authentication
 
-The deliverable excludes:
+The platform uses JWT-based authentication.
 
-- `.env` secrets
-- generated `dist`
-- Python caches
-- local uploaded resume files
-- local virtual environments
+Authentication flow:
+
+User Login
+    │
+    ▼
+FastAPI Authentication API
+    │
+    ▼
+JWT Access Token
+    │
+    ▼
+Frontend stores session
+    │
+    ▼
+Bearer Token
+    │
+    ▼
+Protected API endpoints...
+
+
+
+## Tech Stack that i used to built this...
+
+### Frontend
+- **React** — Component-based user interface
+- **Vite** — Frontend development and production build tooling
+- **JavaScript (ES6+)** — Application logic
+- **Axios** — Communication between frontend and backend REST APIs
+- **CSS3** — Responsive UI styling
+
+### Backend
+- **Python** — Core backend language
+- **FastAPI** — REST API development and backend services
+- **SQLAlchemy** — Database ORM and query management
+- **Pydantic** — Request/response validation and data schemas
+- **Alembic** — Database migrations
+- **JWT** — Authentication and protected API access
+
+### Database
+- **PostgreSQL** — Relational database for users, candidates, jobs, applications, skills, resumes and matching data
+
+### AI & Resume Processing
+- **AI-powered Resume Analysis** — Extracts candidate information from resume content
+- **Resume Text Extraction** — Processes PDF and DOCX resumes
+- **Candidate–Job Matching** — Compares candidate skills and experience with job requirements
+- **Skill Matching Engine** — Identifies matching and missing skills and generates a match score
+
+### DevOps & Deployment
+- **Docker** — Containerized local development environment
+- **Docker Compose** — Local PostgreSQL and service orchestration
+- **Git & GitHub** — Source control and project collaboration
+- **Render** — Production deployment for frontend and backend
+- **REST APIs** — Communication between the React frontend and FastAPI backend
+
+### Development Tools
+- **VS Code** — Development environment
+- **Swagger / OpenAPI** — Interactive backend API documentation
