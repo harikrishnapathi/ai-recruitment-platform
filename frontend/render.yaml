@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: ai-recruitment-frontend
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://ai-recruitment-platform-prka.onrender.com/api/v1
