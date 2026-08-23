@@ -9,7 +9,7 @@ from app.core.authorization import RECRUITER_WRITE_ROLES, require_membership
 from app.core.dependencies import get_current_user
 from app.db.dependencies import get_db
 from app.models.candidate import Candidate
-from app.models.job import Job
+from app.models.job import Job, JobStatus
 from app.models.job_match import JobMatch
 from app.models.job_skill import JobSkill
 from app.models.skill import Skill
@@ -475,3 +475,41 @@ def get_job_matches(
         }
         for match, candidate in rows
     ]
+
+@router.delete("/{job_id}")
+def delete_job(
+    job_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    job = db.scalar(
+        select(Job).where(
+            Job.id == job_id,
+            Job.created_by == current_user.id,
+        )
+    )
+
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found.",
+        )
+
+    if job.status == JobStatus.ARCHIVED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Job is already deleted.",
+        )
+
+    # Production-safe delete:
+    # archive instead of physically deleting the row.
+    job.status = JobStatus.ARCHIVED
+
+    db.commit()
+    db.refresh(job)
+
+    return {
+        "job_id": str(job.id),
+        "status": job.status,
+        "message": "Job deleted successfully.",
+    }

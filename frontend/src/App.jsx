@@ -1087,6 +1087,65 @@ function Dashboard({ onLogout }) {
     }
   }
 
+
+  async function deleteJob(job) {
+  if (!job?.id) {
+    setError("Job ID is missing.");
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Delete "${job.title}"?\n\nThis will remove the job from active listings. Existing applications will be preserved.`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  setError("");
+
+  try {
+    await api.delete(`/jobs/${job.id}`);
+
+    // Remove it immediately from the recruiter UI.
+    setJobs((currentJobs) =>
+      currentJobs.filter(
+        (item) => item.id !== job.id
+      )
+    );
+
+    // Close any open job-related panels.
+    if (selectedJob?.id === job.id) {
+      setSelectedJob(null);
+      setCandidates([]);
+      setCandidateDetails(null);
+    }
+
+    if (showJobSkills?.id === job.id) {
+      setShowJobSkills(null);
+      setJobSkills([]);
+    }
+
+    await loadDashboard();
+
+  } catch (error) {
+    console.error(
+      "Delete job error:",
+      error.response?.data || error
+    );
+
+    if (error.response?.status === 401) {
+      logout();
+      return;
+    }
+
+    setError(
+      error.response?.data?.detail ||
+        "Could not delete job."
+    );
+  }
+}
+
   // ===================================================
   // JOB SKILLS
   // ===================================================
@@ -1742,6 +1801,8 @@ function Dashboard({ onLogout }) {
                     setShowJobSkills(job);
                     loadJobSkills(job.id);
                   }}
+                    onDeleteJob={deleteJob}
+
                 />
               ))}
             </div>
@@ -2513,6 +2574,8 @@ function JobCard({
   job,
   onViewCandidates,
   onManageSkills,
+    onDeleteJob,
+
 }) {
   return (
     <div className="job-card">
@@ -2630,6 +2693,14 @@ function JobCard({
           >
             View Candidates
           </button>
+
+          <button
+  type="button"
+  className="danger-button"
+  onClick={() => onDeleteJob(job)}
+>
+  Delete
+</button>
         </div>
 
       </div>
